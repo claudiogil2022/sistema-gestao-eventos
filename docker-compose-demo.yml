@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  # Frontend Demo (100% Funcional sem backend)
+  frontend_demo:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile_demo
+    container_name: frontend_demo
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge

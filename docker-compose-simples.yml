@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Backend Spring Boot
+  backend_clean:
+    build: ./backend
+    container_name: backend_clean
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    restart: unless-stopped
+
+  # Frontend Nginx (Versão Limpa Simples)
+  frontend_clean:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile_simples
+    container_name: frontend_clean
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend_clean
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
