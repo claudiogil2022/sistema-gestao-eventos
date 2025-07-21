@@ -1,0 +1,142 @@
+<div class="event-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <div class="header-content">
+          <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+          <h2>{{ isEditMode ? 'Editar Evento' : 'Novo Evento' }}</h2>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Loading -->
+      <app-loading [loading]="isLoading" message="Carregando evento..." *ngIf="isLoading"></app-loading>
+
+      <!-- Error Message -->
+      <app-error-message [message]="errorMessage" [retry]="true" (retryEvent)="loadEvent()" *ngIf="errorMessage && !isLoading"></app-error-message>
+
+      <!-- Form -->
+      <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading && !errorMessage">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome do Evento</mat-label>
+            <input matInput
+                   formControlName="nome"
+                   placeholder="Digite o nome do evento"
+                   maxlength="100">
+            <mat-icon matSuffix>event</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('nome')">
+              {{ getFieldError('nome') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descrição</mat-label>
+            <textarea matInput
+                      formControlName="descricao"
+                      placeholder="Descreva o evento (opcional)"
+                      rows="3"
+                      maxlength="500">
+            </textarea>
+            <mat-icon matSuffix>description</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('descricao')">
+              {{ getFieldError('descricao') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Data do Evento</mat-label>
+            <input matInput
+                   [matDatepicker]="picker"
+                   formControlName="data"
+                   placeholder="Selecione a data">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="isFieldInvalid('data')">
+              {{ getFieldError('data') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Local</mat-label>
+            <input matInput
+                   formControlName="local"
+                   placeholder="Local do evento"
+                   maxlength="200">
+            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('local')">
+              {{ getFieldError('local') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Organizador</mat-label>
+            <input matInput
+                   formControlName="organizador"
+                   placeholder="Nome do organizador (opcional)"
+                   maxlength="100">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('organizador')">
+              {{ getFieldError('organizador') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Capacidade Máxima</mat-label>
+            <input matInput
+                   type="number"
+                   formControlName="capacidade"
+                   placeholder="Número de participantes"
+                   min="1"
+                   max="10000">
+            <mat-icon matSuffix>people</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('capacidade')">
+              {{ getFieldError('capacidade') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row" *ngIf="isEditMode">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>flag</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('status')">
+              {{ getFieldError('status') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button mat-button
+                  type="button"
+                  (click)="onCancel()"
+                  [disabled]="isSaving">
+            <mat-icon>cancel</mat-icon>
+            Cancelar
+          </button>
+
+          <button mat-raised-button
+                  color="primary"
+                  type="submit"
+                  [disabled]="eventForm.invalid || isSaving">
+            <mat-icon>{{ isSaving ? 'hourglass_empty' : 'save' }}</mat-icon>
+            {{ isSaving ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Criar') }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
