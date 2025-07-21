@@ -22,8 +22,12 @@
 Execute os comandos no terminal do projeto:
 
 ```powershell
-# Adicionar o remote origin (substitua SEU_USERNAME pelo seu usuário GitHub)
-git remote add origin https://github.com/SEU_USERNAME/sistema-gestao-eventos.git
+# PASSO 1: Substitua SEU_USERNAME pelo seu usuário real do GitHub
+# Exemplo: se seu usuário é "joaosilva", use:
+# git remote add origin https://github.com/joaosilva/sistema-gestao-eventos.git
+
+# Adicionar o remote origin (SUBSTITUA SEU_USERNAME)
+git remote add origin https://github.com/claudiogil2022/sistema-gestao-eventos.git
 
 # Verificar se o remote foi adicionado
 git remote -v
@@ -46,7 +50,7 @@ git push origin --tags
 Após o push, verifique se apareceu no seu GitHub:
 - ✅ Branch `master` com todos os commits
 - ✅ 4 feature branches preservadas
-- ✅ Tags `v1.0.0` e `v1.2.0`
+- ✅ Tags `v1.0.0`, `v1.1.0` e `v1.2.0`
 - ✅ README.md renderizado na página inicial
 - ✅ Todos os arquivos do projeto
 
@@ -107,7 +111,69 @@ git status
 git log feature/backend-spring-boot --oneline
 ```
 
-## 📊 Resultado Final Esperado
+## �️ Troubleshooting
+
+### ❌ Erro: "repository not found"
+```
+fatal: repository 'https://github.com/SEU_USERNAME/sistema-gestao-eventos.git/' not found
+```
+
+**Soluções:**
+1. **Verifique se substituiu SEU_USERNAME** pelo seu usuário real do GitHub
+2. **Verifique se o repositório foi criado** no GitHub.com
+3. **Verifique se o nome está correto**: `sistema-gestao-eventos`
+
+**Comandos para corrigir:**
+```powershell
+# Remover remote incorreto
+git remote remove origin
+
+# Adicionar com nome correto (exemplo: joaosilva)
+git remote add origin https://github.com/joaosilva/sistema-gestao-eventos.git
+
+# Tentar push novamente
+git push -u origin master
+```
+
+### ❌ Erro: "Permission denied"
+Se receber erro de permissão, configure autenticação:
+
+**Opção 1 - Token Personal (Recomendado):**
+1. GitHub.com > Settings > Developer settings > Personal access tokens
+2. Generate new token com permissões de repo
+3. Use o token como senha no push
+
+**Opção 2 - SSH Key:**
+```powershell
+# Gerar nova chave SSH
+ssh-keygen -t ed25519 -C "seu.email@example.com"
+
+# Adicionar ao SSH agent
+ssh-add ~/.ssh/id_ed25519
+
+# Copiar chave pública e adicionar no GitHub
+cat ~/.ssh/id_ed25519.pub
+
+# Usar URL SSH em vez de HTTPS
+git remote set-url origin git@github.com:SEU_USERNAME/sistema-gestao-eventos.git
+```
+
+### 🔍 Verificar Configuração
+```powershell
+# Verificar remote configurado
+git remote -v
+
+# Verificar status
+git status
+
+# Verificar branches
+git branch -a
+
+# Verificar tags
+git tag -l
+```
+
+## �📊 Resultado Final Esperado
 
 Seu repositório GitHub deve mostrar:
 
@@ -131,7 +197,8 @@ Seu repositório GitHub deve mostrar:
 
 🏷️ Releases:
 ├── v1.0.0 (sistema completo)
-└── v1.2.0 (melhorias)
+├── v1.1.0 (primeira atualização)
+└── v1.2.0 (documentação Git)
 ```
 
 ## 🎉 Pronto!
