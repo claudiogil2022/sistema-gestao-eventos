@@ -1,0 +1,7 @@
+{
+  "titulo": "Evento Frontend Test",
+  "descricao": "Teste via frontend form",
+  "dataHoraEvento": "2025-07-22T15:30:00",
+  "local": "Rio de Janeiro", 
+  "capacidade": null
+}
