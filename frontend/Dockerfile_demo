@@ -1,0 +1,25 @@
+# Dockerfile para versão demo (100% funcional sem backend)
+FROM nginx:alpine
+
+# Remove configuração padrão
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copia a configuração
+COPY nginx_demo.conf /etc/nginx/conf.d/default.conf
+
+# Copia o arquivo HTML demo
+COPY src/index_demo.html /usr/share/nginx/html/index.html
+
+# Cria script de inicialização
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'echo "=== VERSAO DEMO INICIADA ==="' >> /docker-entrypoint.sh && \
+    echo 'echo "🌐 Sistema 100% Funcional: http://localhost:3000/"' >> /docker-entrypoint.sh && \
+    echo 'echo "✅ Versao Demo - Sem dependencia de backend"' >> /docker-entrypoint.sh && \
+    echo 'echo "📊 Dados mockados - Todas as funcionalidades disponiveis"' >> /docker-entrypoint.sh && \
+    echo 'echo ""' >> /docker-entrypoint.sh && \
+    echo 'nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+CMD ["/docker-entrypoint.sh"]
