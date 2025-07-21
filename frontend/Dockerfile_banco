@@ -1,0 +1,26 @@
+# Dockerfile para versão com banco de dados
+FROM nginx:alpine
+
+# Remove configuração padrão
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copia a configuração com proxy para API
+COPY nginx_clean.conf /etc/nginx/conf.d/default.conf
+
+# Copia o arquivo HTML que conecta com banco
+COPY src/index_clean.html /usr/share/nginx/html/index.html
+
+# Cria script de inicialização
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'echo "=== VERSAO COM BANCO DE DADOS ==="' >> /docker-entrypoint.sh && \
+    echo 'echo "🌐 Frontend com Backend: http://localhost:3000/"' >> /docker-entrypoint.sh && \
+    echo 'echo "🗃️ API Backend: http://localhost:8080/api/events"' >> /docker-entrypoint.sh && \
+    echo 'echo "🔧 PostgreSQL Database conectado"' >> /docker-entrypoint.sh && \
+    echo 'echo "✅ Versao com persistencia de dados real"' >> /docker-entrypoint.sh && \
+    echo 'echo ""' >> /docker-entrypoint.sh && \
+    echo 'nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+CMD ["/docker-entrypoint.sh"]
