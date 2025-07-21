@@ -1,0 +1,7 @@
+{
+  "titulo": "Evento Teste CORS",
+  "descricao": "Teste de comunicacao via proxy nginx",
+  "dataHoraEvento": "2025-07-22T14:00:00",
+  "local": "Sao Paulo",
+  "capacidade": 100
+}

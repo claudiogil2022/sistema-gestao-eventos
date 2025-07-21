@@ -1,0 +1,7 @@
+{
+  "titulo": "Evento Teste Capacidade",
+  "descricao": "Teste do campo capacidade e validação de data flexível",
+  "dataHoraEvento": "2025-01-21T18:00:00",
+  "local": "Auditório Principal",
+  "capacidade": 150
+}
