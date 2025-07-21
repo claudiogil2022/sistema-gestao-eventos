@@ -1,0 +1,129 @@
+.event-form-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-content mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: var(--mat-sys-primary);
+}
+
+.header-content h2 {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Form Layout */
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.full-width {
+  flex: 1;
+}
+
+.half-width {
+  flex: 1;
+}
+
+/* Form Fields */
+mat-form-field {
+  width: 100%;
+}
+
+mat-form-field mat-icon[matSuffix] {
+  color: var(--mat-sys-outline);
+}
+
+/* Textarea */
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.form-actions button {
+  min-width: 120px;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Error State */
+.error-container {
+  margin: 1rem 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .event-form-container {
+    margin: 1rem;
+    padding: 0;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .half-width {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+/* Material Design Enhancements */
+mat-card {
+  border-radius: var(--mat-sys-corner-large);
+  box-shadow: var(--mat-sys-level2);
+}
+
+mat-form-field.mat-form-field-appearance-outline {
+  margin-bottom: 0.5rem;
+}
+
+/* Field Validation */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+  border-color: var(--mat-sys-error);
+}
+
+/* Button States */
+button[disabled] {
+  opacity: 0.6;
+}
+
+button mat-icon {
+  margin-right: 0.5rem;
+}
