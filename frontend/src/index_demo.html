@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Sistema de Gerenciamento de Eventos - Versão Demo</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sistema para gerenciamento de eventos - versão demo com dados mockados">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- BOOTSTRAP CSS para UI moderna -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .main-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header-section {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e9ecef;
+    }
+    .header-title {
+      color: #2c3e50;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .header-subtitle {
+      color: #6c757d;
+      font-size: 1.1rem;
+    }
+    .demo-badge {
+      background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 10px;
+      display: inline-block;
+    }
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    .events-section {
+      margin-bottom: 40px;
+    }
+    .events-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    .section-title {
+      color: #2c3e50;
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin: 0;
+    }
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+      border: none;
+      border-radius: 25px;
+      padding: 12px 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: white;
+    }
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      color: white;
+    }
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    .event-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      padding: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    .event-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    .event-title {
+      color: #2c3e50;
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .event-details {
+      margin-bottom: 15px;
+    }
+    .event-detail {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
+    .event-detail i {
+      margin-right: 8px;
+      width: 16px;
+    }
+    .event-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-ativo {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-inativo {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .event-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    .btn-sm-custom {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-info-custom {
+      background: #74b9ff;
+      color: white;
+    }
+    .btn-warning-custom {
+      background: #fdcb6e;
+      color: #2d3436;
+    }
+    .btn-danger-custom {
+      background: #e17055;
+      color: white;
+    }
+    .btn-sm-custom:hover {
+      transform: scale(1.05);
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
+    }
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #74b9ff;
+    }
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="header-title">
+        <i class="bi bi-calendar-event"></i>
+        Sistema de Gerenciamento de Eventos
+      </h1>
+      <p class="header-subtitle">Gerencie seus eventos de forma simples e eficiente</p>
+      <span class="demo-badge">
+        <i class="bi bi-check-circle"></i>
+        Versão Demo - 100% Funcional
+      </span>
+    </div>
+
+    <!-- Success Alert -->
+    <div id="successAlert" class="alert alert-success" style="display: none;">
+      <strong>Sucesso:</strong> <span id="successMessage"></span>
+    </div>
+
+    <!-- Stats Section -->
+    <div id="statsSection" class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="totalEvents">0</div>
+        <div class="stat-label">Total de Eventos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="activeEvents">0</div>
+        <div class="stat-label">Eventos Ativos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="upcomingEvents">0</div>
+        <div class="stat-label">Próximos Eventos</div>
+      </div>
+    </div>
+
+    <!-- Events Section -->
+    <div id="eventsSection" class="events-section">
+      <div class="events-header">
+        <h2 class="section-title">
+          <i class="bi bi-list-ul"></i>
+          Lista de Eventos
+        </h2>
+        <button class="btn btn-primary-custom" onclick="openCreateModal()">
+          <i class="bi bi-plus-circle"></i>
+          Novo Evento
+        </button>
+      </div>
+      <div id="eventsGrid" class="events-grid">
+        <!-- Events will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Create/Edit Event -->
+  <div id="eventModal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h3 id="modalTitle">Novo Evento</h3>
+        <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+      </div>
+      <form id="eventForm">
+        <div class="form-group">
+          <label class="form-label" for="eventName">Nome do Evento</label>
+          <input type="text" id="eventName" class="form-control" required placeholder="Digite o nome do evento">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eventDescription">Descrição</label>
+          <textarea id="eventDescription" class="form-control" rows="3" placeholder="Descreva o evento"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eventDate">Data do Evento</label>
+          <input type="datetime-local" id="eventDate" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eventLocation">Local</label>
+          <input type="text" id="eventLocation" class="form-control" placeholder="Local do evento">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eventCapacity">Capacidade</label>
+          <input type="number" id="eventCapacity" class="form-control" min="1" placeholder="Número máximo de participantes">
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" onclick="closeModal()" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-primary-custom">Salvar Evento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // DADOS MOCKADOS (simulando backend)
+    let events = [
+      {
+        id: 1,
+        nome: "Conferência de Tecnologia 2025",
+        descricao: "Evento sobre as últimas tendências em tecnologia",
+        data: "2025-08-15T09:00:00",
+        local: "Centro de Convenções São Paulo",
+        capacidade: 500,
+        deleted: false
+      },
+      {
+        id: 2,
+        nome: "Workshop de JavaScript",
+        descricao: "Aprenda JavaScript moderno com especialistas",
+        data: "2025-07-30T14:00:00",
+        local: "Auditório TechHub",
+        capacidade: 50,
+        deleted: false
+      },
+      {
+        id: 3,
+        nome: "Meetup de Desenvolvedores",
+        descricao: "Networking e troca de experiências",
+        data: "2025-07-25T19:00:00",
+        local: "Café Central",
+        capacidade: 30,
+        deleted: false
+      }
+    ];
+    
+    let nextId = 4;
+    let editingEventId = null;
+
+    // INICIALIZAÇÃO
+    document.addEventListener('DOMContentLoaded', function() {
+      loadEvents();
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('eventForm').addEventListener('submit', handleFormSubmit);
+      
+      // Fechar modal clicando fora
+      document.getElementById('eventModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+      });
+    }
+
+    // CARREGAR EVENTOS (usando dados mockados)
+    function loadEvents() {
+      renderStats();
+      renderEvents();
+    }
+
+    // RENDERIZAR ESTATÍSTICAS
+    function renderStats() {
+      const now = new Date();
+      const activeEvents = events.filter(event => !event.deleted);
+      const upcomingEvents = activeEvents.filter(event => new Date(event.data) > now);
+
+      document.getElementById('totalEvents').textContent = events.length;
+      document.getElementById('activeEvents').textContent = activeEvents.length;
+      document.getElementById('upcomingEvents').textContent = upcomingEvents.length;
+    }
+
+    // RENDERIZAR LISTA DE EVENTOS
+    function renderEvents() {
+      const grid = document.getElementById('eventsGrid');
+      const activeEvents = events.filter(event => !event.deleted);
+      
+      if (activeEvents.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6c757d;">
+            <i class="bi bi-calendar-x" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <h4>Nenhum evento encontrado</h4>
+            <p>Clique em "Novo Evento" para criar seu primeiro evento.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = activeEvents.map(event => `
+        <div class="event-card">
+          <div class="event-title">${escapeHtml(event.nome)}</div>
+          <div class="event-details">
+            <div class="event-detail">
+              <i class="bi bi-calendar-date"></i>
+              ${formatDate(event.data)}
+            </div>
+            <div class="event-detail">
+              <i class="bi bi-geo-alt"></i>
+              ${escapeHtml(event.local || 'Local não informado')}
+            </div>
+            <div class="event-detail">
+              <i class="bi bi-people"></i>
+              ${event.capacidade || 'Capacidade não definida'} participantes
+            </div>
+            <div class="event-detail">
+              <i class="bi bi-info-circle"></i>
+              ${escapeHtml(event.descricao || 'Sem descrição')}
+            </div>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <span class="event-status status-ativo">Ativo</span>
+          </div>
+          <div class="event-actions">
+            <button class="btn-sm-custom btn-info-custom" onclick="viewEvent(${event.id})" title="Visualizar">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn-sm-custom btn-warning-custom" onclick="editEvent(${event.id})" title="Editar">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn-sm-custom btn-danger-custom" onclick="deleteEvent(${event.id})" title="Excluir">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // MODAL FUNCTIONS
+    function openCreateModal() {
+      editingEventId = null;
+      document.getElementById('modalTitle').textContent = 'Novo Evento';
+      document.getElementById('eventForm').reset();
+      showModal();
+    }
+
+    function editEvent(id) {
+      const event = events.find(e => e.id === id);
+      if (!event) return;
+
+      editingEventId = id;
+      document.getElementById('modalTitle').textContent = 'Editar Evento';
+      
+      // Preencher formulário
+      document.getElementById('eventName').value = event.nome || '';
+      document.getElementById('eventDescription').value = event.descricao || '';
+      document.getElementById('eventDate').value = formatDateForInput(event.data);
+      document.getElementById('eventLocation').value = event.local || '';
+      document.getElementById('eventCapacity').value = event.capacidade || '';
+      
+      showModal();
+    }
+
+    function viewEvent(id) {
+      const event = events.find(e => e.id === id);
+      if (!event) return;
+
+      alert(`
+DETALHES DO EVENTO
+
+Nome: ${event.nome}
+Descrição: ${event.descricao || 'Não informado'}
+Data: ${formatDate(event.data)}
+Local: ${event.local || 'Não informado'}
+Capacidade: ${event.capacidade || 'Não definida'}
+Status: Ativo
+      `);
+    }
+
+    function deleteEvent(id) {
+      if (!confirm('Tem certeza que deseja excluir este evento?')) return;
+
+      // Marcar como deletado
+      const eventIndex = events.findIndex(e => e.id === id);
+      if (eventIndex !== -1) {
+        events[eventIndex].deleted = true;
+        showSuccess('Evento excluído com sucesso!');
+        loadEvents();
+      }
+    }
+
+    function showModal() {
+      document.getElementById('eventModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('eventModal').style.display = 'none';
+      editingEventId = null;
+    }
+
+    // FORM HANDLING
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const formData = {
+        nome: document.getElementById('eventName').value,
+        descricao: document.getElementById('eventDescription').value,
+        data: document.getElementById('eventDate').value,
+        local: document.getElementById('eventLocation').value,
+        capacidade: parseInt(document.getElementById('eventCapacity').value) || null,
+        deleted: false
+      };
+
+      if (editingEventId) {
+        // Editar evento existente
+        const eventIndex = events.findIndex(e => e.id === editingEventId);
+        if (eventIndex !== -1) {
+          events[eventIndex] = { ...events[eventIndex], ...formData };
+          showSuccess('Evento atualizado com sucesso!');
+        }
+      } else {
+        // Criar novo evento
+        const newEvent = { id: nextId++, ...formData };
+        events.push(newEvent);
+        showSuccess('Evento criado com sucesso!');
+      }
+
+      closeModal();
+      loadEvents();
+    }
+
+    // UTILITY FUNCTIONS
+    function showSuccess(message) {
+      document.getElementById('successMessage').textContent = message;
+      document.getElementById('successAlert').style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('successAlert').style.display = 'none';
+      }, 3000);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Data não informada';
+      const date = new Date(dateString);
+      return date.toLocaleString('pt-BR');
+    }
+
+    function formatDateForInput(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 16);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
