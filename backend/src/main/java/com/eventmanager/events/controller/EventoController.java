@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Optional;
 
 @RestController
@@ -126,5 +125,21 @@ public class EventoController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/count")
+    @Operation(summary = "Contador de eventos criados", 
+               description = "Retorna o número total de eventos criados desde o início da aplicação. " +
+                           "Este contador é mantido em memória e é reiniciado a cada restart da aplicação.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contador retornado com sucesso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Long.class, example = "42"))),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor",
+                    content = @Content)
+    })
+    public ResponseEntity<Long> countCreatedEvents() {
+        long count = eventoService.getEventosCreatedCount();
+        return ResponseEntity.ok(count);
     }
 }

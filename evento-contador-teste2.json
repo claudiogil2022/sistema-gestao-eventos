@@ -1,0 +1,6 @@
+{
+  "titulo": "Segundo Evento Teste",
+  "descricao": "Segundo evento para testar o contador thread-safe",
+  "dataHoraEvento": "2025-08-25T16:00:00",
+  "local": "Sala de Conferências B"
+}
