@@ -22,12 +22,12 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Nome do Evento</mat-label>
             <input matInput
-                   formControlName="nome"
+                   formControlName="titulo"
                    placeholder="Digite o nome do evento"
                    maxlength="100">
-            <mat-icon matSuffix>event</mat-icon>
-            <mat-error *ngIf="isFieldInvalid('nome')">
-              {{ getFieldError('nome') }}
+            <mat-icon matSuffix>title</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('titulo')">
+              {{ getFieldError('titulo') }}
             </mat-error>
           </mat-form-field>
         </div>
@@ -51,18 +51,32 @@
         <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
             <mat-label>Data do Evento</mat-label>
-            <input matInput
-                   [matDatepicker]="picker"
-                   formControlName="data"
+            <input matInput 
+                   [matDatepicker]="datePicker"
+                   formControlName="dataEvento"
                    placeholder="Selecione a data">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="isFieldInvalid('data')">
-              {{ getFieldError('data') }}
+            <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
+            <mat-error *ngIf="isFieldInvalid('dataEvento')">
+              {{ getFieldError('dataEvento') }}
             </mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Horário</mat-label>
+            <input matInput
+                   type="time"
+                   formControlName="horaEvento"
+                   placeholder="00:00">
+            <mat-icon matSuffix>access_time</mat-icon>
+            <mat-error *ngIf="isFieldInvalid('horaEvento')">
+              {{ getFieldError('horaEvento') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Local</mat-label>
             <input matInput
                    formControlName="local"
@@ -71,49 +85,6 @@
             <mat-icon matSuffix>location_on</mat-icon>
             <mat-error *ngIf="isFieldInvalid('local')">
               {{ getFieldError('local') }}
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Organizador</mat-label>
-            <input matInput
-                   formControlName="organizador"
-                   placeholder="Nome do organizador (opcional)"
-                   maxlength="100">
-            <mat-icon matSuffix>person</mat-icon>
-            <mat-error *ngIf="isFieldInvalid('organizador')">
-              {{ getFieldError('organizador') }}
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Capacidade Máxima</mat-label>
-            <input matInput
-                   type="number"
-                   formControlName="capacidade"
-                   placeholder="Número de participantes"
-                   min="1"
-                   max="10000">
-            <mat-icon matSuffix>people</mat-icon>
-            <mat-error *ngIf="isFieldInvalid('capacidade')">
-              {{ getFieldError('capacidade') }}
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <div class="form-row" *ngIf="isEditMode">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-              <mat-option *ngFor="let status of statusOptions" [value]="status.value">
-                {{ status.label }}
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix>flag</mat-icon>
-            <mat-error *ngIf="isFieldInvalid('status')">
-              {{ getFieldError('status') }}
             </mat-error>
           </mat-form-field>
         </div>

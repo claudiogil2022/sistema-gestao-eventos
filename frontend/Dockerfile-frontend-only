@@ -1,0 +1,47 @@
+# Etapa 1: Build da aplicação Angular
+FROM node:20-alpine AS build-stage
+WORKDIR /app
+
+# Copia os arquivos de dependências
+COPY package*.json ./
+RUN rm -rf node_modules package-lock.json && npm install
+
+# Copia o código fonte
+COPY . .
+
+# Remove node_modules e instala dependências de produção
+RUN rm -rf node_modules && npm ci
+
+# Compila a aplicação Angular para produção
+RUN npm run build:prod
+
+# Verifica se o build foi criado corretamente
+RUN ls -la /app/dist/event-manager-frontend/browser/
+
+# Etapa 2: Produção com Nginx
+FROM nginx:alpine AS production-stage
+
+# Remove a configuração padrão do Nginx
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copia a configuração customizada do Nginx (apenas frontend)
+COPY nginx-frontend-only.conf /etc/nginx/conf.d/default.conf
+
+# Copia os arquivos construídos do Angular
+COPY --from=build-stage /app/dist/event-manager-frontend/browser /usr/share/nginx/html
+
+# Verifica se os arquivos foram copiados
+RUN ls -la /usr/share/nginx/html/
+
+# Cria um script de inicialização simples
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'echo "Starting nginx..."' >> /docker-entrypoint.sh && \
+    echo 'echo "Files in /usr/share/nginx/html:"' >> /docker-entrypoint.sh && \
+    echo 'ls -la /usr/share/nginx/html' >> /docker-entrypoint.sh && \
+    echo 'nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
+
+EXPOSE 80
+
+# Executa o nginx
+ENTRYPOINT ["/docker-entrypoint.sh"]

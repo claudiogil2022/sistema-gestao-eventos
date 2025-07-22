@@ -19,7 +19,7 @@ import {
   providedIn: 'root'
 })
 export class EventoService {
-  private readonly apiUrl = `${environment.apiUrl}/events`;
+  private readonly apiUrl = `${environment.apiUrl}/eventos`;
 
   constructor(private http: HttpClient) {}
 

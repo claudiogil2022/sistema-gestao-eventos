@@ -7,21 +7,17 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { Evento, PagedResponse } from '../../../../core/models';
 import { LoadingService, NotificationService, OverlayCleanupService } from '../../../../core/services';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 import { EventsFacadeService } from '../../services/events-facade.service';
-import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
-import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
-import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
-import { EventoStatusPipe } from '../../../../shared/pipes/evento-status.pipe';
 
 /**
  * Componente para listagem de eventos
@@ -34,16 +30,12 @@ import { EventoStatusPipe } from '../../../../shared/pipes/evento-status.pipe';
     MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatTableModule,
     MatPaginatorModule,
     MatTooltipModule,
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,
-    LoadingComponent,
-    ErrorMessageComponent,
-    TruncatePipe,
-    EventoStatusPipe
+    MatProgressSpinnerModule
   ],
   templateUrl: './event-list.html',
   styleUrls: ['./event-list.css']
@@ -57,8 +49,6 @@ export class EventListComponent implements OnInit, OnDestroy {
   currentPage = 0;
   pageSize = 10;
   totalElements = 0;
-
-  displayedColumns: string[] = ['nome', 'data', 'local', 'status', 'actions'];
 
   private destroy$ = new Subject<void>();
 
@@ -79,17 +69,11 @@ export class EventListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Limpeza robusta de overlays e dialogs
-    this.overlayCleanup.cleanupAll();
-    
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   loadEvents(): void {
-    // Limpeza preventiva de overlays antes de iniciar carregamento
-    this.overlayCleanup.cleanupAll();
-    
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -127,33 +111,26 @@ export class EventListComponent implements OnInit, OnDestroy {
   }
 
   onDeleteEvent(event: Evento): void {
-    // Fechar qualquer dialog aberto antes de abrir um novo
-    this.dialog.closeAll();
-    
-    // Aguardar um tick para garantir que o overlay anterior foi removido
-    setTimeout(() => {
-      const dialogData: ConfirmationDialogData = {
-        title: 'Confirmar Exclusão',
-        message: `Tem certeza que deseja excluir o evento "${event.nome}"? Esta ação não pode ser desfeita.`,
-        confirmText: 'Excluir',
-        cancelText: 'Cancelar',
-        confirmColor: 'warn'
-      };
+    const dialogData: ConfirmationDialogData = {
+      title: 'Confirmar Exclusão',
+      message: `Tem certeza que deseja excluir o evento "${event.titulo}"? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+      confirmColor: 'warn'
+    };
 
-      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-        data: dialogData,
-        width: '400px',
-        disableClose: false,
-        hasBackdrop: true,
-        panelClass: 'confirmation-dialog'
-      });
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: dialogData,
+      width: '400px',
+      disableClose: false,
+      hasBackdrop: true
+    });
 
-      dialogRef.afterClosed().subscribe(confirmed => {
-        if (confirmed && event.id) {
-          this.deleteEvent(event.id);
-        }
-      });
-    }, 100);
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed && event.id) {
+        this.deleteEvent(event.id);
+      }
+    });
   }
 
   private deleteEvent(id: number): void {
@@ -174,6 +151,64 @@ export class EventListComponent implements OnInit, OnDestroy {
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.loadEvents();
+  }
+
+  // Helper methods for the new UI
+  getTotalEvents(): number {
+    return this.totalElements;
+  }
+
+  getActiveEvents(): number {
+    // Considera eventos ativos como aqueles que não foram deletados (todos os que estão na lista)
+    return this.events.length;
+  }
+
+  getUpcomingEvents(): number {
+    return this.events.filter(event => this.getEventStatus(event) === 'upcoming').length;
+  }
+
+  getEventStatus(event: Evento): 'active' | 'upcoming' | 'finished' | 'cancelled' {
+    const now = new Date();
+    const eventDate = new Date(event.dataHoraEvento);
+    
+    // Lógica baseada apenas na data
+    if (eventDate > now) {
+      return 'upcoming';
+    } else if (eventDate.toDateString() === now.toDateString()) {
+      return 'active';
+    } else {
+      return 'finished';
+    }
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'active': return 'play_circle';
+      case 'upcoming': return 'schedule';
+      case 'finished': return 'check_circle';
+      case 'cancelled': return 'cancel';
+      default: return 'event';
+    }
+  }
+
+  formatDateTime(date: string): string {
+    const eventDate = new Date(date);
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return eventDate.toLocaleDateString('pt-BR', options);
+  }
+
+  navigateToCreate(): void {
+    this.router.navigate(['/events/new']);
+  }
+
+  refresh(): void {
     this.loadEvents();
   }
 }

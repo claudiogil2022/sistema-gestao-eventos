@@ -8,9 +8,6 @@ export interface Evento {
   dataHoraEvento: string; // ISO date string
   local: string;
   descricao?: string;
-  organizador?: string;
-  capacidade?: number;
-  status?: 'ATIVO' | 'CANCELADO' | 'FINALIZADO';
   deleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -24,15 +21,12 @@ export interface EventoCreateRequest {
   dataHoraEvento: string;
   local: string;
   descricao?: string;
-  organizador?: string;
-  capacidade?: number;
 }
 
 /**
  * DTO para atualização de eventos
  */
 export interface EventoUpdateRequest extends Partial<EventoCreateRequest> {
-  status?: 'ATIVO' | 'CANCELADO' | 'FINALIZADO';
 }
 
 /**

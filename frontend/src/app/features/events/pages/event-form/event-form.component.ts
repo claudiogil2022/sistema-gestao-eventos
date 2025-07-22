@@ -53,12 +53,6 @@ export class EventFormComponent implements OnInit, OnDestroy {
   isSaving = false;
   errorMessage = '';
 
-  statusOptions = [
-    { value: 'ATIVO', label: 'Ativo' },
-    { value: 'CANCELADO', label: 'Cancelado' },
-    { value: 'FINALIZADO', label: 'Finalizado' }
-  ];
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -72,7 +66,10 @@ export class EventFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.eventId = this.route.snapshot.params['id'];
+    console.log('EventForm - Parâmetro ID recebido:', this.eventId);
+    console.log('EventForm - URL atual:', window.location.href);
     this.isEditMode = !!this.eventId;
+    console.log('EventForm - Modo de edição:', this.isEditMode);
 
     if (this.isEditMode) {
       this.loadEvent();
@@ -88,11 +85,9 @@ export class EventFormComponent implements OnInit, OnDestroy {
     return this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       descricao: ['', [Validators.maxLength(500)]],
-      dataHoraEvento: ['', [Validators.required]],
-      local: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
-      organizador: ['', [Validators.maxLength(100)]],
-      capacidade: ['', [Validators.min(1), Validators.max(10000)]],
-      status: ['ATIVO', [Validators.required]]
+      dataEvento: ['', [Validators.required]],
+      horaEvento: ['', [Validators.required]],
+      local: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]]
     });
   }
 
@@ -119,14 +114,16 @@ export class EventFormComponent implements OnInit, OnDestroy {
   }
 
   private populateForm(evento: Evento): void {
+    // Separar data e hora
+    const dataEvento = new Date(evento.dataHoraEvento);
+    const hora = dataEvento.toTimeString().slice(0, 5); // HH:MM
+
     this.eventForm.patchValue({
-      nome: evento.nome,
+      titulo: evento.titulo,
       descricao: evento.descricao || '',
-      data: new Date(evento.data),
-      local: evento.local,
-      organizador: evento.organizador || '',
-      capacidade: evento.capacidade || '',
-      status: evento.status || 'ATIVO'
+      dataEvento: dataEvento,
+      horaEvento: hora,
+      local: evento.local
     });
   }
 
@@ -142,14 +139,14 @@ export class EventFormComponent implements OnInit, OnDestroy {
     const formValue = this.eventForm.value;
     
     if (this.isEditMode) {
+      // Combinar data e hora
+      const dataHoraEvento = this.combinarDataHora(formValue.dataEvento, formValue.horaEvento);
+      
       const eventoUpdate: EventoUpdateRequest = {
-        nome: formValue.nome,
+        titulo: formValue.titulo,
         descricao: formValue.descricao,
-        data: formValue.data.toISOString().split('T')[0], // Format to YYYY-MM-DD
-        local: formValue.local,
-        organizador: formValue.organizador,
-        capacidade: formValue.capacidade,
-        status: formValue.status
+        dataHoraEvento: dataHoraEvento.toISOString(),
+        local: formValue.local
       };
 
       this.eventsFacade.updateEvent(this.eventId!, eventoUpdate)
@@ -166,13 +163,14 @@ export class EventFormComponent implements OnInit, OnDestroy {
           }
         });
     } else {
+      // Combinar data e hora
+      const dataHoraEvento = this.combinarDataHora(formValue.dataEvento, formValue.horaEvento);
+      
       const eventoCreate: EventoCreateRequest = {
-        nome: formValue.nome,
+        titulo: formValue.titulo,
         descricao: formValue.descricao,
-        data: formValue.data.toISOString().split('T')[0], // Format to YYYY-MM-DD
-        local: formValue.local,
-        organizador: formValue.organizador,
-        capacidade: formValue.capacidade
+        dataHoraEvento: dataHoraEvento.toISOString(),
+        local: formValue.local
       };
 
       this.eventsFacade.createEvent(eventoCreate)
@@ -205,7 +203,15 @@ export class EventFormComponent implements OnInit, OnDestroy {
   getFieldError(fieldName: string): string {
     const control = this.eventForm.get(fieldName);
     if (control?.errors && control.touched) {
-      if (control.errors['required']) return `${fieldName} é obrigatório`;
+      if (control.errors['required']) {
+        switch(fieldName) {
+          case 'titulo': return 'Nome do evento é obrigatório';
+          case 'dataEvento': return 'Data do evento é obrigatória';
+          case 'horaEvento': return 'Horário do evento é obrigatório';
+          case 'local': return 'Local do evento é obrigatório';
+          default: return `${fieldName} é obrigatório`;
+        }
+      }
       if (control.errors['minlength']) return `${fieldName} deve ter pelo menos ${control.errors['minlength'].requiredLength} caracteres`;
       if (control.errors['maxlength']) return `${fieldName} deve ter no máximo ${control.errors['maxlength'].requiredLength} caracteres`;
       if (control.errors['min']) return `${fieldName} deve ser maior que ${control.errors['min'].min}`;
@@ -217,6 +223,13 @@ export class EventFormComponent implements OnInit, OnDestroy {
   isFieldInvalid(fieldName: string): boolean {
     const control = this.eventForm.get(fieldName);
     return !!(control?.invalid && control.touched);
+  }
+
+  private combinarDataHora(data: Date, hora: string): Date {
+    const [horas, minutos] = hora.split(':').map(Number);
+    const dataCompleta = new Date(data);
+    dataCompleta.setHours(horas, minutos, 0, 0);
+    return dataCompleta;
   }
 }
 

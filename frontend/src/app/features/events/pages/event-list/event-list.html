@@ -1,132 +1,176 @@
-<div class="event-list-container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        <div class="header-content">
-          <div class="title-section">
-            <mat-icon>event</mat-icon>
-            <h2>Gerenciamento de Eventos</h2>
-          </div>
-          <button mat-raised-button color="primary"
-                  (click)="createNewEvent()"
-                  class="add-button">
-            <mat-icon>add</mat-icon>
-            Novo Evento
-          </button>
+<div class="modern-event-list">
+  <!-- Modern Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-area">
+        <div class="title-icon">
+          <mat-icon>calendar_today</mat-icon>
         </div>
-      </mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content>
-      <!-- Loading -->
-      <app-loading [loading]="isLoading"
-                   message="Carregando eventos...">
-      </app-loading>
-
-      <!-- Error Message -->
-      <app-error-message [message]="errorMessage"
-                         [retry]="true"
-                         (retryEvent)="loadEvents()">
-      </app-error-message>
-
-      <!-- Empty State -->
-      <div *ngIf="!isLoading && events.length === 0 && !errorMessage"
-           class="empty-state">
-        <mat-icon class="empty-icon">event_busy</mat-icon>
-        <h3>Nenhum evento encontrado</h3>
-        <p>Comece criando seu primeiro evento!</p>
-        <button mat-raised-button color="primary"
+        <div class="title-text">
+          <h1>Eventos</h1>
+          <p class="subtitle">Gerencie seus eventos de forma simples e eficiente</p>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <button mat-stroked-button 
+                class="secondary-button"
+                (click)="loadEvents()">
+          <mat-icon>refresh</mat-icon>
+          Atualizar
+        </button>
+        <button mat-flat-button 
+                color="primary" 
+                class="primary-button"
                 (click)="createNewEvent()">
           <mat-icon>add</mat-icon>
-          Criar Primeiro Evento
+          Novo Evento
         </button>
       </div>
+    </div>
+  </div>
 
-      <!-- Events Table -->
-      <div *ngIf="!isLoading && events.length > 0" class="table-container">
-        <table mat-table [dataSource]="events" class="events-table">
-
-          <!-- Nome Column -->
-          <ng-container matColumnDef="nome">
-            <th mat-header-cell *matHeaderCellDef>Nome</th>
-            <td mat-cell *matCellDef="let event">
-              <div class="event-name">
-                <strong>{{ event.nome | truncate:30 }}</strong>
-                <small *ngIf="event.descricao">{{ event.descricao | truncate:50 }}</small>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Data Column -->
-          <ng-container matColumnDef="data">
-            <th mat-header-cell *matHeaderCellDef>Data</th>
-            <td mat-cell *matCellDef="let event">
-              {{ event.data | date:'dd/MM/yyyy HH:mm' }}
-            </td>
-          </ng-container>
-
-          <!-- Local Column -->
-          <ng-container matColumnDef="local">
-            <th mat-header-cell *matHeaderCellDef>Local</th>
-            <td mat-cell *matCellDef="let event">
-              {{ event.local | truncate:25 }}
-            </td>
-          </ng-container>
-
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let event">
-              <span class="status-badge"
-                    [ngClass]="'status-' + (event.status?.toLowerCase() || 'ativo')">
-                {{ event.status | eventoStatus }}
-              </span>
-            </td>
-          </ng-container>
-
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Ações</th>
-            <td mat-cell *matCellDef="let event">
-              <div class="actions-buttons">
-                <button mat-icon-button
-                        color="primary"
-                        matTooltip="Visualizar"
-                        (click)="viewEvent(event.id!)">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button
-                        color="accent"
-                        matTooltip="Editar"
-                        (click)="editEvent(event.id!)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button
-                        color="warn"
-                        matTooltip="Excluir"
-                        (click)="onDeleteEvent(event)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Table Header and Rows -->
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-              class="event-row"></tr>
-        </table>
-
-        <!-- Pagination -->
-        <mat-paginator [length]="totalElements"
-                       [pageSize]="pageSize"
-                       [pageSizeOptions]="[5, 10, 25, 50]"
-                       [pageIndex]="currentPage"
-                       (page)="onPageChange($event)"
-                       showFirstLastButtons>
-        </mat-paginator>
+  <!-- Quick Stats -->
+  <div class="stats-section" *ngIf="!isLoading && events.length > 0">
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <mat-icon>event_available</mat-icon>
       </div>
-    </mat-card-content>
-  </mat-card>
+      <div class="stat-info">
+        <span class="stat-number">{{ totalElements }}</span>
+        <span class="stat-label">Total de Eventos</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <mat-icon>event</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ getActiveEvents() }}</span>
+        <span class="stat-label">Ativos</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon upcoming">
+        <mat-icon>schedule</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-number">{{ getUpcomingEvents() }}</span>
+        <span class="stat-label">Próximos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Carregando eventos...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !isLoading" class="error-state">
+    <div class="error-content">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <h3>Ops! Algo deu errado</h3>
+      <p>{{ errorMessage }}</p>
+      <button mat-flat-button color="primary" (click)="loadEvents()">
+        <mat-icon>refresh</mat-icon>
+        Tentar Novamente
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && events.length === 0 && !errorMessage" class="empty-state">
+    <div class="empty-content">
+      <div class="empty-illustration">
+        <mat-icon>event_note</mat-icon>
+      </div>
+      <h3>Nenhum evento encontrado</h3>
+      <p>Que tal criar seu primeiro evento? É rápido e fácil!</p>
+      <button mat-flat-button color="primary" (click)="createNewEvent()">
+        <mat-icon>add</mat-icon>
+        Criar Primeiro Evento
+      </button>
+    </div>
+  </div>
+
+  <!-- Modern Events Grid -->
+  <div *ngIf="!isLoading && events.length > 0" class="events-section">
+    <div class="events-header">
+      <h2>{{ totalElements }} {{ totalElements === 1 ? 'evento' : 'eventos' }} encontrado{{ totalElements === 1 ? '' : 's' }}</h2>
+    </div>
+    
+    <div class="events-grid">
+      <div *ngFor="let event of events" class="event-card-wrapper">
+        <div class="event-card" (click)="viewEvent(event.id!)">
+          <!-- Event Status Badge -->
+          <div class="event-badge" [ngClass]="getEventStatus(event)">
+            <mat-icon>{{ getStatusIcon(getEventStatus(event)) }}</mat-icon>
+          </div>
+          
+          <!-- Event Content -->
+          <div class="event-content">
+            <div class="event-header">
+              <h3 class="event-title">{{ event.titulo }}</h3>
+              <p class="event-location">
+                <mat-icon>place</mat-icon>
+                {{ event.local }}
+              </p>
+            </div>
+            
+            <div class="event-description">
+              <p>{{ event.descricao | slice:0:120 }}{{ (event.descricao?.length || 0) > 120 ? '...' : '' }}</p>
+            </div>
+            
+            <div class="event-datetime">
+              <div class="datetime-info">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ formatDateTime(event.dataHoraEvento) }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Event Actions -->
+          <div class="event-actions" (click)="$event.stopPropagation()">
+            <button mat-icon-button 
+                    class="action-btn view-btn"
+                    (click)="viewEvent(event.id!)" 
+                    matTooltip="Visualizar evento">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button 
+                    class="action-btn edit-btn"
+                    (click)="editEvent(event.id!)" 
+                    matTooltip="Editar evento">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button 
+                    class="action-btn delete-btn"
+                    (click)="onDeleteEvent(event)" 
+                    matTooltip="Excluir evento">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section" *ngIf="events.length > 0">
+      <mat-paginator
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
 </div>
 

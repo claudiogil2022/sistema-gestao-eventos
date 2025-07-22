@@ -4,7 +4,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 // Interceptors
-import { LoadingInterceptor, ErrorInterceptor } from './interceptors';
+import { LoadingInterceptor } from './interceptors';
 
 // Services
 import { EventoService, LoadingService, NotificationService } from './services';
@@ -25,11 +25,6 @@ import { AuthGuard } from './guards';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: LoadingInterceptor,
-      multi: true
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: ErrorInterceptor,
       multi: true
     }
   ]

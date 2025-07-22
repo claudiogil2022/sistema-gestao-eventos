@@ -7,15 +7,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialog } from '@angular/material/dialog';
 
 import { Evento } from '../../../../core/models';
-import { NotificationService, OverlayCleanupService } from '../../../../core/services';
+import { NotificationService } from '../../../../core/services';
 import { EventsFacadeService } from '../../services/events-facade.service';
 import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
-import { EventoStatusPipe } from '../../../../shared/pipes/evento-status.pipe';
-import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 /**
  * Componente para exibir detalhes de um evento
@@ -31,8 +28,7 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../../..
     MatChipsModule,
     MatDividerModule,
     LoadingComponent,
-    ErrorMessageComponent,
-    EventoStatusPipe
+    ErrorMessageComponent
   ],
   templateUrl: './event-detail.html',
   styleUrls: ['./event-detail.css']
@@ -49,22 +45,21 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private eventsFacade: EventsFacadeService,
-    private notificationService: NotificationService,
-    private dialog: MatDialog,
-    private overlayCleanup: OverlayCleanupService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
     this.eventId = Number(this.route.snapshot.params['id']);
-    if (this.eventId) {
-      this.loadEvent();
+    
+    if (!this.eventId || isNaN(this.eventId) || this.eventId <= 0) {
+      this.errorMessage = 'ID do evento inválido';
+      return;
     }
+    
+    this.loadEvent();
   }
 
   ngOnDestroy(): void {
-    // Limpeza robusta de overlays e dialogs
-    this.overlayCleanup.cleanupAll();
-    
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -83,9 +78,18 @@ export class EventDetailComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error: any) => {
-          this.errorMessage = 'Erro ao carregar detalhes do evento';
           this.isLoading = false;
           console.error('Erro ao carregar evento:', error);
+          
+          if (error.status === 404) {
+            this.errorMessage = `Evento com ID ${this.eventId} não foi encontrado`;
+          } else if (error.status === 0) {
+            this.errorMessage = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+          } else if (error.error?.message) {
+            this.errorMessage = error.error.message;
+          } else {
+            this.errorMessage = 'Erro ao carregar detalhes do evento';
+          }
         }
       });
   }
@@ -99,48 +103,43 @@ export class EventDetailComponent implements OnInit, OnDestroy {
   onDelete(): void {
     if (!this.evento) return;
 
-    // Fechar qualquer dialog aberto antes de abrir um novo
-    this.dialog.closeAll();
+    const confirmed = confirm(`Tem certeza que deseja excluir o evento "${this.evento.titulo}"?`);
     
-    // Aguardar um tick para garantir que o overlay anterior foi removido
-    setTimeout(() => {
-      const dialogData: ConfirmationDialogData = {
-        title: 'Confirmar Exclusão',
-        message: `Tem certeza que deseja excluir o evento "${this.evento?.nome}"?`,
-        confirmText: 'Excluir',
-        cancelText: 'Cancelar',
-        confirmColor: 'warn'
-      };
-
-      const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-        data: dialogData,
-        width: '400px',
-        disableClose: false,
-        hasBackdrop: true,
-        panelClass: 'confirmation-dialog'
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result && this.eventId) {
-          this.deleteEvent();
-        }
-      });
-    }, 100);
+    if (confirmed && this.eventId) {
+      this.deleteEvent();
+    }
   }
 
   private deleteEvent(): void {
     if (!this.eventId) return;
 
+    this.isLoading = true;
+    
     this.eventsFacade.deleteEvent(this.eventId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          this.isLoading = false;
           this.notificationService.success('Evento excluído com sucesso!');
-          this.router.navigate(['/events']);
+          // Aguardar um pouco antes de navegar para garantir que a mensagem seja vista
+          setTimeout(() => {
+            this.router.navigate(['/events']);
+          }, 1000);
         },
         error: (error: any) => {
-          this.notificationService.error('Erro ao excluir evento');
+          this.isLoading = false;
           console.error('Erro ao excluir evento:', error);
+          
+          let errorMessage = 'Erro ao excluir evento';
+          if (error.status === 404) {
+            errorMessage = 'Evento não encontrado';
+          } else if (error.status === 403) {
+            errorMessage = 'Sem permissão para excluir este evento';
+          } else if (error.error?.message) {
+            errorMessage = error.error.message;
+          }
+          
+          this.notificationService.error(errorMessage);
         }
       });
   }
@@ -149,27 +148,29 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/events']);
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'ATIVO':
-        return 'primary';
-      case 'FINALIZADO':
-        return 'accent';
-      case 'CANCELADO':
-        return 'warn';
-      default:
-        return '';
-    }
-  }
-
   formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    if (!dateString) return 'Data não informada';
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Verificar se a data é válida
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      
+      return date.toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Erro ao formatar data:', error);
+      return 'Erro na data';
+    }
   }
 }
 

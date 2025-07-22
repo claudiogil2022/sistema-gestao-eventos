@@ -46,7 +46,7 @@ services:
     build: ./frontend # Constrói a imagem a partir do Dockerfile na pasta 'frontend'
     container_name: eventmanager_frontend
     ports:
-      - "3000:80" # Mapeia a porta do host (3000) para a porta 80 do Nginx
+      - "4200:80" # Mapeia a porta do host (4200) para a porta 80 do Nginx
     environment:
       # A base URL da API para o frontend.
       # Para comunicação interna entre containers, use o nome do serviço 'backend'.

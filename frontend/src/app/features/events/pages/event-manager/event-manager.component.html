@@ -1,0 +1,207 @@
+<div class="event-manager-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1 class="page-title">
+      <mat-icon>event</mat-icon>
+      Gestão de Eventos
+    </h1>
+    <button mat-raised-button color="primary" (click)="onNewEvent()" class="new-event-btn">
+      <mat-icon>add</mat-icon>
+      Novo Evento
+    </button>
+  </div>
+
+  <div class="content-wrapper">
+    <!-- Formulário -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ isEditing ? 'Editar Evento' : 'Novo Evento' }}
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="eventForm" (ngSubmit)="onSaveEvent()" class="event-form">
+          
+          <!-- Título -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Título do Evento</mat-label>
+            <input matInput formControlName="titulo" maxlength="100">
+            <mat-icon matSuffix>title</mat-icon>
+            <mat-error *ngIf="eventForm.get('titulo')?.invalid && eventForm.get('titulo')?.touched">
+              {{ getErrorMessage('titulo') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Descrição -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descrição</mat-label>
+            <textarea matInput formControlName="descricao" rows="3" maxlength="500"></textarea>
+            <mat-icon matSuffix>description</mat-icon>
+            <mat-error *ngIf="eventForm.get('descricao')?.invalid && eventForm.get('descricao')?.touched">
+              {{ getErrorMessage('descricao') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Data e Hora -->
+          <div class="date-time-row">
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Data do Evento</mat-label>
+              <input matInput type="date" formControlName="dataEvento">
+              <mat-icon matSuffix>calendar_today</mat-icon>
+              <mat-error *ngIf="eventForm.get('dataEvento')?.invalid && eventForm.get('dataEvento')?.touched">
+                {{ getErrorMessage('dataEvento') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="time-field">
+              <mat-label>Hora do Evento</mat-label>
+              <input matInput type="time" formControlName="horaEvento">
+              <mat-icon matSuffix>access_time</mat-icon>
+              <mat-error *ngIf="eventForm.get('horaEvento')?.invalid && eventForm.get('horaEvento')?.touched">
+                {{ getErrorMessage('horaEvento') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Local -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Local do Evento</mat-label>
+            <input matInput formControlName="local" maxlength="200">
+            <mat-icon matSuffix>location_on</mat-icon>
+            <mat-error *ngIf="eventForm.get('local')?.invalid && eventForm.get('local')?.touched">
+              {{ getErrorMessage('local') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Botões -->
+          <div class="form-actions">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="eventForm.invalid || loading"
+              class="save-btn">
+              <mat-icon>save</mat-icon>
+              {{ isEditing ? 'Atualizar' : 'Salvar' }}
+            </button>
+
+            <button 
+              mat-button 
+              type="button" 
+              (click)="onNewEvent()" 
+              [disabled]="loading"
+              class="cancel-btn">
+              <mat-icon>clear</mat-icon>
+              Limpar
+            </button>
+          </div>
+
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Lista de Eventos -->
+    <mat-card class="list-card">
+      <mat-card-header>
+        <mat-card-title>Eventos Cadastrados</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="table-container" *ngIf="!loading">
+          <table mat-table [dataSource]="events" class="events-table">
+
+            <!-- Coluna Título -->
+            <ng-container matColumnDef="titulo">
+              <th mat-header-cell *matHeaderCellDef>Título</th>
+              <td mat-cell *matCellDef="let event">
+                <div class="event-title">
+                  <mat-icon class="event-icon">event</mat-icon>
+                  {{ event.titulo }}
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Coluna Data/Hora -->
+            <ng-container matColumnDef="dataHoraEvento">
+              <th mat-header-cell *matHeaderCellDef>Data e Hora</th>
+              <td mat-cell *matCellDef="let event">
+                <div class="event-datetime">
+                  <div class="date">{{ formatarDataBrasileira(event.dataHoraEvento) }}</div>
+                  <div class="time">{{ event.dataHoraEvento | date:'HH:mm':'pt-BR' }}</div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Coluna Local -->
+            <ng-container matColumnDef="local">
+              <th mat-header-cell *matHeaderCellDef>Local</th>
+              <td mat-cell *matCellDef="let event">
+                <div class="event-location">
+                  <mat-icon class="location-icon">location_on</mat-icon>
+                  {{ event.local }}
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Coluna Ações -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Ações</th>
+              <td mat-cell *matCellDef="let event">
+                <div class="action-buttons">
+                  <button 
+                    mat-icon-button 
+                    color="primary" 
+                    (click)="onViewEvent(event)"
+                    matTooltip="Visualizar evento"
+                    [disabled]="loading">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  
+                  <button 
+                    mat-icon-button 
+                    color="accent" 
+                    (click)="onEventSelect(event)"
+                    matTooltip="Editar evento"
+                    [disabled]="loading">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  
+                  <button 
+                    mat-icon-button 
+                    color="warn" 
+                    (click)="onDeleteEvent(event)"
+                    matTooltip="Excluir evento"
+                    [disabled]="loading">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+                [class.selected-row]="selectedEvent?.id === row.id"></tr>
+
+          </table>
+
+          <!-- Mensagem quando não há eventos -->
+          <div *ngIf="events.length === 0" class="no-events">
+            <mat-icon>event_busy</mat-icon>
+            <p>Nenhum evento cadastrado</p>
+            <button mat-raised-button color="primary" (click)="onNewEvent()">
+              Criar primeiro evento
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="loading-container">
+          <mat-spinner></mat-spinner>
+          <p>Carregando eventos...</p>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
